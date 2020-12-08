@@ -35,6 +35,7 @@ Running results time in seconds:
 |    512   |  2517 |  2921 |   -   |   -   |
 
 - Manager already running : 
+
 | URLs no. | App 1 | App 2 | App 3 | App 4 |
 |----------|-------|-------|-------|-------|
 |    24    |  130  |   -   |   -   |   -   |
