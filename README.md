@@ -128,7 +128,7 @@ Alternatively, set FullAccess permissions for EC2, S3, SQS and CloudWatch in you
 5. After creating the new policy, set the policy to your IAM Role created in step 3.
 
 
-##Instructions
+## Instructions
 
 1.Inside the project directory compile the project using the command : "mvn package".
 
