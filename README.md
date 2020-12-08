@@ -17,7 +17,9 @@ Created by:
 ## General info
 
 EC2 instances used:
-Manager & Workers - ami-0885b1f6bd170450c (64-bit x86) type: T2_MICRO
+Manager & Workers - 
+ * Used AMI - ami-0885b1f6bd170450c
+ * Machine type - (64-bit x86) type: T2_MICRO
 
 ## Statistics:
 
@@ -38,6 +40,12 @@ including running Manger (Cold start) :
 +---------------+------+------+------+------+
 |      512      | 2517 | 2921 |   -  |   -  |
 +---------------+------+------+------+------+
+
+| Results |       |       |   |
+|---------|-------|-------|---|
+|         | file1 | file2 |   |
+|         |       |       |   |
+|         |       |       |   |
 
 Manager already running : 
 
