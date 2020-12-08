@@ -123,7 +123,7 @@ https://aws.amazon.com/iam/
 }
 ```
 
-alternatively, set FullAccess permissions for EC2,S3,SQS and cloudwatch in your policy created .
+Alternatively, set FullAccess permissions for EC2, S3, SQS and CloudWatch in your policy created.
 
 5. After creating the new policy, set the policy to your IAM Role created in step 3.
 
