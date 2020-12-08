@@ -19,7 +19,7 @@ Created by:
 EC2 instances used:
 Manager & Workers - ami-0885b1f6bd170450c (64-bit x86) type: T2_MICRO
 
-##Statistics:
+## Statistics:
 
 including running Manger (Cold start) :
 
