@@ -130,7 +130,7 @@ Alternatively, set FullAccess permissions for EC2, S3, SQS and CloudWatch in you
 
 ## Instructions
 
-1. Inside the project directory compile the project using the command : "mvn package".
+1. Inside the project directory compile the project using the command : ```mvn package```.
 
 2. Create in the project target directory file named "iam_arn.txt" .
 
