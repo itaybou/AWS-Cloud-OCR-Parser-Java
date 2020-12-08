@@ -139,9 +139,9 @@ Alternatively, set FullAccess permissions for EC2, S3, SQS and CloudWatch in you
 4. Make sure your input text file located in the project target directory.
 
 5. The application should be run as follows:  
-	"java -jar local.jar <inputFileName> <outputFileName> <n>"  
+	```java -jar local.jar <inputFileName> <outputFileName> <n>```  
 if you want to terminate the manager:  
-	"java -jar local.jar <inputFileName> <outputFileName> <n> terminate"  
+	```java -jar local.jar <inputFileName> <outputFileName> <n> terminate```  
 
 while <inputFileName> is the name of the input file, <outputFileName> is the name of the output file and 
 <n> is: workers - files ratio (how many image files per worker).
