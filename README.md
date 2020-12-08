@@ -130,15 +130,15 @@ Alternatively, set FullAccess permissions for EC2, S3, SQS and CloudWatch in you
 
 ## Instructions
 
-1.Inside the project directory compile the project using the command : "mvn package".
+1. Inside the project directory compile the project using the command : "mvn package".
 
-2.Create in the project target directory file named "iam_arn.txt" .
+2. Create in the project target directory file named "iam_arn.txt" .
 
-3.Put your Instance Profile ARN of the created role from the setup instructions inside the "iam_arn.txt" file.
+3. Put your Instance Profile ARN of the created role from the setup instructions inside the "iam_arn.txt" file.
 
-3.Make sure your input text file located in the project target directory.
+4. Make sure your input text file located in the project target directory.
 
-4.The application should be run as follows:
+5. The application should be run as follows:
 	"java -jar local.jar <inputFileName> <outputFileName> <n>"
 if you want to terminate the manager:
 	"java -jar local.jar <inputFileName> <outputFileName> <n> terminate"
