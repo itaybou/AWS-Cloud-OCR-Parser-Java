@@ -68,22 +68,22 @@ Manager already running :
 1. Local Application does one of the two:
 	1. Starts the manager
 	1. Checks if a manager is active and if not, starts it
-4.Manager downloads list of images files from S3
-5.Manager creates an SQS message for each URL in the list of images
-6.Manager calculates the needed worker count according to the lines per worker
+1. Manager downloads list of images files from S3
+1. Manager creates an SQS message for each URL in the list of images
+1. Manager calculates the needed worker count according to the lines per worker
 parameter recieved from the local application
-7.Worker gets an image URL from an SQS queue
-8.Worker initiates a stream from the input URL.
-9.Worker applies OCR on image using tesseract library.
-10.Worker puts a message in :
-	10.1. The temporary aggregation queue for the specific local app 
-	10.2. The manager response queue in order to notify the manger that the URL has been processed.
-11.Manager reads all the Workers' messages from the aggregation queue and creates one summary file
-12.Manager uploads summary file to S3
-13.Manager posts an SQS message about summary file
-14.Local Application reads SQS message
-15.Local Application downloads summary file from S3
-16.Local Application creates html output files
+1. Worker gets an image URL from an SQS queue
+1. Worker initiates a stream from the input URL.
+1. Worker applies OCR on image using tesseract library.
+1. Worker puts a message in :
+	1. The temporary aggregation queue for the specific local app 
+	1. The manager response queue in order to notify the manger that the URL has been processed.
+1. Manager reads all the Workers' messages from the aggregation queue and creates one summary file
+1. Manager uploads summary file to S3
+1. Manager posts an SQS message about summary file
+1. Local Application reads SQS message
+1. Local Application downloads summary file from S3
+1. Local Application creates html output files
 
 ## Setup
 1.Install aws cli in your operating system, for more information click here :
