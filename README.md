@@ -61,7 +61,7 @@ Manager already running :
 
 ## Project workflow and summary
 
-![Project workflow diagram](http://url/to/img.png)
+![Project workflow diagram](https://github.com/itaybou/AWS-Cloud-OCR-Parser-Java/blob/main/design.png)
 
 1.Local Application uploads the file with the list of images to S3
 2.Local Application sends a message (queue) stating of the location of the images list on S3
