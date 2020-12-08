@@ -9,8 +9,8 @@ Created by:
 
 ## Table of contents
 * [General info](#general-info)
-* [Statistics] (#Statistics)
-* [Project workflow and summary] (#project-workflow)
+* [Statistics](#Statistics)
+* [Project workflow and summary](#project-workflow)
 * [Setup](#setup)
 * [Instructions](#Instructions)
 
