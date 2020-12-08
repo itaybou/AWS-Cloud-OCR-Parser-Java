@@ -72,17 +72,17 @@ parameter recieved from the local application
 1. Local Application creates html output files
 
 ## Setup
-1.Install aws cli in your operating system, for more information click here :
+1. Install aws cli in your operating system, for more information click here :
 https://aws.amazon.com/cli/
 
-2.Configure your amazon aws credentials in your .aws directory, alternatively you can set your credentials by using aws cli : 
+2. Configure your amazon aws credentials in your .aws directory, alternatively you can set your credentials by using aws cli : 
 write in your cmd - "aws config".
 
-3.Create a new IAM Role in aws console :
+3. Create a new IAM Role in aws console :
 https://aws.amazon.com/iam/
 
 
-4.Create a new policy with the following json format (notice that you need to change <@Your_Role_ID> to your role ID number) :
+4. Create a new policy with the following json format (notice that you need to change <@Your_Role_ID> to your role ID number) :
 ```
 {
     "Version": "2012-10-17",
@@ -138,12 +138,12 @@ Alternatively, set FullAccess permissions for EC2, S3, SQS and CloudWatch in you
 
 4. Make sure your input text file located in the project target directory.
 
-5. The application should be run as follows:
-	"java -jar local.jar <inputFileName> <outputFileName> <n>"
-if you want to terminate the manager:
-	"java -jar local.jar <inputFileName> <outputFileName> <n> terminate"
+5. The application should be run as follows:  
+	"java -jar local.jar <inputFileName> <outputFileName> <n>"  
+if you want to terminate the manager:  
+	"java -jar local.jar <inputFileName> <outputFileName> <n> terminate"  
 
-while inputFileName is the name of the input file, outputFileName is the name of the output file and 
-n is: workers - files ratio (how many image files per worker).
+while <inputFileName> is the name of the input file, <outputFileName> is the name of the output file and 
+<n> is: workers - files ratio (how many image files per worker).
 
 
