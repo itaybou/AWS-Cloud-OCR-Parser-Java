@@ -63,11 +63,11 @@ Manager already running :
 
 ![Project workflow diagram](https://github.com/itaybou/AWS-Cloud-OCR-Parser-Java/blob/main/design.png)
 
-l. Local Application uploads the file with the list of images to S3
-l. Local Application sends a message (queue) stating of the location of the images list on S3
-l. Local Application does one of the two:
-	l. Starts the manager
-	l. Checks if a manager is active and if not, starts it
+1. Local Application uploads the file with the list of images to S3
+1. Local Application sends a message (queue) stating of the location of the images list on S3
+1. Local Application does one of the two:
+	1. Starts the manager
+	1. Checks if a manager is active and if not, starts it
 4.Manager downloads list of images files from S3
 5.Manager creates an SQS message for each URL in the list of images
 6.Manager calculates the needed worker count according to the lines per worker
