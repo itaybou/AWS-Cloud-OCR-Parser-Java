@@ -1,0 +1,10 @@
+adapters/SQSAdapter.class
+worker/Worker.class
+manager/Manager.class
+adapters/S3Adapter.class
+adapters/MessageReceivedCallback.class
+manager/WorkerHandler.class
+local/Local.class
+protocol/MessageProtocol.class
+adapters/S3ObjectCallback.class
+manager/WorkerHandler$1.class

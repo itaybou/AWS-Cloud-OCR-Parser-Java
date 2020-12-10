@@ -38,7 +38,7 @@ public class SQSAdapter {
     sqs.deleteMessage(deleteRequest);
   }
 
-  public void receiveMessage(MessageReceivedCallback callback) {
+  public boolean receiveMessage(MessageReceivedCallback callback) {
     ReceiveMessageRequest messageRequest =
         ReceiveMessageRequest.builder()
             .queueUrl(queueURL)
@@ -53,7 +53,9 @@ public class SQSAdapter {
       } catch (Exception e) {
         e.printStackTrace();
       }
+      return true;
     }
+    return false;
   }
 
   public void receiveMessageBatch(MessageReceivedCallback callback) {

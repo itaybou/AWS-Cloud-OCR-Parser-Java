@@ -42,8 +42,8 @@ public class Local {
   private static SQSAdapter responseQueue;
   private static SQSAdapter taskQueue;
 
-  private static final String MANAGER_AMI = "ami-0945dc12a6cf41253";
-  private static final String WORKER_AMI = "ami-0848b4a51cf08cad9";
+  private static final String MANAGER_AMI = "ami-061c3fb70d78ecdbd";
+  private static final String WORKER_AMI = "ami-09611376a9e8f95c7";
   private static final String queueAppManagerName = "manager_tasks";
   private static final String IAM_ARN_FILENAME = "iam_arn.txt";
 

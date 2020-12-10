@@ -114,8 +114,9 @@ public class Manager {
   }
 
   private static void appTaskListener() {
-    while (!terminated.get()) {
-      appTasksQueue.receiveMessage(Manager::parseApplicationMessage);
+    boolean hasMoreTasks = true;
+    while (!terminated.get() || hasMoreTasks) {
+      hasMoreTasks = appTasksQueue.receiveMessage(Manager::parseApplicationMessage);
     }
   }
 
