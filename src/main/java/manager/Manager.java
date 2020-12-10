@@ -56,12 +56,13 @@ public class Manager {
     String appTasksQueueName = args[0];
     String workerAmi = args[1];
     String iamArn = args[2];
+    String userId = args[3];
 
     sqs = SqsClient.builder().region(REGION).build();
     appTasksQueue = new SQSAdapter(sqs, appTasksQueueName, false);
     workerTasksQueue = new SQSAdapter(sqs, workerTasksQueueName, true);
     workerResponseQueue = new SQSAdapter(sqs, workerResponseQueueName, true);
-    workerHandler = new WorkerHandler(REGION, workerAmi, iamArn, getWorkerBashScript());
+    workerHandler = new WorkerHandler(REGION, workerAmi, iamArn, userId, getWorkerBashScript());
 
     storage = new S3Adapter(REGION);
     terminated = new AtomicBoolean(false);
@@ -114,9 +115,13 @@ public class Manager {
   }
 
   private static void appTaskListener() {
-    boolean hasMoreTasks = true;
-    while (!terminated.get() || hasMoreTasks) {
-      hasMoreTasks = appTasksQueue.receiveMessage(Manager::parseApplicationMessage);
+    while (!terminated.get()) {
+      appTasksQueue.receiveMessage(Manager::parseApplicationMessage);
+    }
+
+    boolean hasMoreWaitingApps = true;
+    while(hasMoreWaitingApps) {
+      hasMoreWaitingApps = appTasksQueue.receiveMessage(Manager::notifyTermination);
     }
   }
 
@@ -131,6 +136,17 @@ public class Manager {
       handleApplicationTask(appId, inputFileBucketKey, URLPerWorker);
       terminated.compareAndSet(false, Boolean.parseBoolean(messageSplits[4]));
     } catch (InterruptedException | ExecutionException | IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  private static void notifyTermination(Message message) {
+    try {
+      appTasksQueue.deleteMessage(message);
+      String[] messageSplits = MessageProtocol.split(message.body());
+      UUID appId = UUID.fromString(messageSplits[1]);
+      new SQSAdapter(sqs, appId.toString(), false).sendMessage(MessageProtocol.createManagerTerminationMessage());
+    } catch (InterruptedException | ExecutionException e) {
       e.printStackTrace();
     }
   }

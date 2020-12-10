@@ -10,6 +10,7 @@
         <module name="Assignment1 - new 3" />
         <module name="OCR-aws" />
         <module name="Assignment1 - new" />
+        <module name="AWS-Cloud-OCR-Parser-Java" />
       </profile>
     </annotationProcessing>
   </component>

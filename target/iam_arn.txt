@@ -1,2 +1,0 @@
-634035623936
-arn:aws:iam::634035623936:instance-profile/OCRActor

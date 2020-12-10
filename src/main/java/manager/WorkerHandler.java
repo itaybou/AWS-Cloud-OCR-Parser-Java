@@ -1,67 +1,45 @@
 package manager;
 
+import protocol.MessageProtocol;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.cloudwatch.CloudWatchClient;
+import software.amazon.awssdk.services.cloudwatch.model.*;
 import software.amazon.awssdk.services.ec2.Ec2Client;
+import software.amazon.awssdk.services.ec2.model.Tag;
 import software.amazon.awssdk.services.ec2.model.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 public class WorkerHandler {
 
     private final Ec2Client ec2;
-    private final ReentrantLock workerLock;
-    private boolean startedWorkers;
+    private static CloudWatchClient cw;
 
     private static final int MAX_AWS_WORKERS = 20;
-    private static final int WORKER_BALANCER_DELAY_MIN = 3;
+
     private final String workerAMI;
     private final String iamArn;
+    private final String userId;
     private final String workerBashScript;
+    private final Region region;
 
     private final AtomicInteger expectedWorkerCount;
 
-    public WorkerHandler(Region region, String workerAMI, String iamArn, String workerBashScript) {
+    public WorkerHandler(Region region, String workerAMI, String iamArn, String userId, String workerBashScript) {
         ec2 = Ec2Client.builder().region(region).build();
+        cw = CloudWatchClient.builder().region(region).build();
         expectedWorkerCount = new AtomicInteger(0);
         this.workerBashScript = workerBashScript;
         this.workerAMI = workerAMI;
         this.iamArn = iamArn;
-        this.workerLock = new ReentrantLock();
-        startedWorkers = false;
-
-        new Timer().schedule(
-                new TimerTask() {
-                    @Override
-                    public void run() {
-                        workerLock.lock();
-                        synchronized (this) {
-                            try {
-                                if(startedWorkers) this.wait(1000 * 60);
-                                int activeWorkerCount = getActiveWorkerInstanceIds().size();
-                                int expectedWorkers = expectedWorkerCount.get();
-                                if (activeWorkerCount < expectedWorkers
-                                        && expectedWorkers < MAX_AWS_WORKERS) {
-                                    initWorkers(expectedWorkers - activeWorkerCount);
-                                }
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                            workerLock.unlock();
-                        }
-                        startedWorkers = false;
-                    }
-                },
-                1000 * 60 * WORKER_BALANCER_DELAY_MIN);
+        this.userId = userId;
+        this.region = region;
     }
 
     public synchronized void startWorkers(int workerCount) {
-        workerLock.lock();
         List<String> activeWorkerIds = getActiveWorkerInstanceIds();
         int workersToCreate = workerCount - activeWorkerIds.size();
         if (activeWorkerIds.size() == MAX_AWS_WORKERS || workersToCreate <= 0) return;
@@ -71,8 +49,6 @@ public class WorkerHandler {
         }
 
         initWorkers(workersToCreate);
-        startedWorkers = true;
-        workerLock.unlock();
     }
 
     private synchronized void initWorkers(int workersToCreate) {
@@ -95,6 +71,7 @@ public class WorkerHandler {
             List<String> instanceIds =
                     workers.stream().map(Instance::instanceId).collect(Collectors.toList());
             addWorkerTags(instanceIds);
+            addWorkerAlarms(instanceIds);
             expectedWorkerCount.set(expectedWorkerCount.get() + workersToCreate);
         } catch (Exception e) {
             e.printStackTrace();
@@ -108,13 +85,42 @@ public class WorkerHandler {
         ec2.createTags(tagRequest);
     }
 
+    private synchronized void addWorkerAlarms(List<String> instanceIds) {
+        List<Dimension> dimensions = instanceIds.stream().map(instanceId ->
+                Dimension.builder().name("InstanceId").value(instanceId).build()).collect(Collectors.toList());
+
+        PutMetricAlarmRequest metricAlarmRequest =
+                PutMetricAlarmRequest.builder()
+                        .alarmName(String.format("%s-recover-alarm-worker", MessageProtocol.BUCKET_PREFIX))
+                        .alarmActions(
+                            String.format(
+                                    "arn:aws:swf:%s:%s:action/actions/AWS_EC2.InstanceId.Reboot/1.0", region, userId))
+                        .evaluationPeriods(1)
+                        .comparisonOperator(ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD)
+                        .metricName("StatusCheckFailed_System")
+                        .threshold(5.0)
+                        .namespace("AWS/EC2")
+                        .period(60 * 5)
+                        .statistic(Statistic.MINIMUM)
+                        .actionsEnabled(true)
+                        .alarmDescription(
+                                "Alarm when system constantly fails due to:\n"
+                                        + "\t- Loss of network connectivity\n"
+                                        + "\t- Loss of system power\n"
+                                        + "\t- Software issues on the physical host\n"
+                                        + "\t- Hardware issues on the physical host that impact network reachability")
+                        .unit(StandardUnit.SECONDS)
+                        .dimensions(dimensions)
+                        .build();
+
+        cw.putMetricAlarm(metricAlarmRequest);
+    }
+
     public synchronized void terminateWorkers() {
-        workerLock.lock();
         TerminateInstancesRequest terminateInstancesRequest =
                 TerminateInstancesRequest.builder().instanceIds(getActiveWorkerInstanceIds()).build();
         ec2.terminateInstances(terminateInstancesRequest);
         expectedWorkerCount.set(0);
-        workerLock.unlock();
     }
 
     private synchronized List<String> getActiveWorkerInstanceIds() {

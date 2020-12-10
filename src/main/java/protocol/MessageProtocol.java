@@ -15,6 +15,7 @@ public class MessageProtocol {
   // Manager messages
   public static final String MANAGER_WORKER_TASK = "new_image_task";
   public static final String MANAGER_DONE = "done_task";
+  public static final String MANAGER_TERMINATED = "terminated";
 
   // Worker messages
   public static final String WORKER_TASK_FINISH = "done_ocr_task";
@@ -28,7 +29,11 @@ public class MessageProtocol {
   }
 
   public static String createManagerResponseMessage() {
-    return String.format("%s", MANAGER_DONE);
+    return MANAGER_DONE;
+  }
+
+  public static String createManagerTerminationMessage() {
+    return MANAGER_TERMINATED;
   }
 
   public static String createWorkerTaskMessage(UUID id, String line) {

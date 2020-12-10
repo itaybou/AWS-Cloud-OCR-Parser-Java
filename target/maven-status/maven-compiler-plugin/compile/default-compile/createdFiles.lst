@@ -7,4 +7,3 @@ manager/WorkerHandler.class
 local/Local.class
 protocol/MessageProtocol.class
 adapters/S3ObjectCallback.class
-manager/WorkerHandler$1.class

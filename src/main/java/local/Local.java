@@ -42,8 +42,8 @@ public class Local {
   private static SQSAdapter responseQueue;
   private static SQSAdapter taskQueue;
 
-  private static final String MANAGER_AMI = "ami-061c3fb70d78ecdbd";
-  private static final String WORKER_AMI = "ami-09611376a9e8f95c7";
+  private static final String MANAGER_AMI = "ami-0f3c7ed2b8b4ca277";
+  private static final String WORKER_AMI = "ami-04438a9e1605bea8d";
   private static final String queueAppManagerName = "manager_tasks";
   private static final String IAM_ARN_FILENAME = "iam_arn.txt";
 
@@ -111,12 +111,15 @@ public class Local {
                         String[] messageSplits = MessageProtocol.split(message.body());
                         if (messageSplits[0].equals(MessageProtocol.MANAGER_DONE)) {
                           generateHTMLFromBucket(bucketName, ((double) totalTimeMS / 1000));
-                          terminate(bucketName);
-                          receivedResponse = true;
+                        } else if(messageSplits[0].equals(MessageProtocol.MANAGER_TERMINATED)) {
+                          System.err.println("Manager already terminated, no output given.\n");
+                          generateTerminationHTML(((double) totalTimeMS / 1000));
                         }
                       } catch (IOException | ExecutionException | InterruptedException e) {
-                        System.err.println("Application terminated without result.\n");
+                        System.err.println("Application terminated unexpectedly without result.\n");
+                      } finally {
                         terminate(bucketName);
+                        receivedResponse = true;
                       }
                     });
               }
@@ -187,7 +190,7 @@ public class Local {
 
         PutMetricAlarmRequest metricAlarmRequest =
             PutMetricAlarmRequest.builder()
-                .alarmName(String.format("%s-recover-alarm", MessageProtocol.BUCKET_PREFIX))
+                .alarmName(String.format("%s-recover-alarm-manager", MessageProtocol.BUCKET_PREFIX))
                 .alarmActions(
                     String.format(
                         "arn:aws:swf:%s:%s:action/actions/AWS_EC2.InstanceId.Reboot/1.0",
@@ -231,6 +234,25 @@ public class Local {
       }
     }
     return false;
+  }
+
+  private static void generateTerminationHTML(double totalTimeSec) {
+    try (BufferedWriter bw = new BufferedWriter(new FileWriter(outputFile))) {
+      bw.write("<!DOCTYPE html>");
+      bw.write(
+              String.format(
+                      "<html>\n"
+                              + "<head>\n"
+                              + "<title>Response %s</title>\n"
+                              + "</head>\n"
+                              + "<body>\n"
+                              + "<h1 style=\"color: red; text-align: center\">%s - Rejected time E2E: %.2f sec</h1>\n",
+                      appId.toString(), "Manager terminated before processing the request.", totalTimeSec));
+
+      bw.write("</body>\n" + "</html>");
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   private static void generateHTMLFromBucket(String bucketName, double totalTimeSec)
@@ -340,7 +362,7 @@ public class Local {
                     + "fi\n",
                 JAR_BUCKET)
             + "sudo unzip manager.zip\n"
-            + String.format("sudo java -jar manager.jar %s %s %s", queueAppManagerName, WORKER_AMI, iamArn);
+            + String.format("sudo java -jar manager.jar %s %s %s %s", queueAppManagerName, WORKER_AMI, iamArn, userId);
     return encodeStringBase64(userData);
   }
 
