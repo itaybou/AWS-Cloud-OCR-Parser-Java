@@ -42,8 +42,8 @@ public class Local {
   private static SQSAdapter responseQueue;
   private static SQSAdapter taskQueue;
 
-  private static final String MANAGER_AMI = "ami-0f3c7ed2b8b4ca277";
-  private static final String WORKER_AMI = "ami-04438a9e1605bea8d";
+  private static final String MANAGER_AMI = "ami-031460345a19f545b";
+  private static final String WORKER_AMI = "ami-0d6c1006bc5c1bac7";
   private static final String queueAppManagerName = "manager_tasks";
   private static final String IAM_ARN_FILENAME = "iam_arn.txt";
 
@@ -106,7 +106,6 @@ public class Local {
                 responseQueue.receiveMessage(
                     message -> {
                       try {
-                        responseQueue.deleteMessage(message);
                         long totalTimeMS = System.currentTimeMillis() - startTimeMS;
                         String[] messageSplits = MessageProtocol.split(message.body());
                         if (messageSplits[0].equals(MessageProtocol.MANAGER_DONE)) {
@@ -115,19 +114,19 @@ public class Local {
                           System.err.println("Manager already terminated, no output given.\n");
                           generateTerminationHTML(((double) totalTimeMS / 1000));
                         }
+                        responseQueue.deleteMessage(message);
                       } catch (IOException | ExecutionException | InterruptedException e) {
                         System.err.println("Application terminated unexpectedly without result.\n");
-                      } finally {
-                        terminate(bucketName);
-                        receivedResponse = true;
                       }
+                      terminate(bucketName);
+                      receivedResponse = true;
                     });
               }
             })
         .start();
   }
 
-  private static void terminate(String bucketName) throws ExecutionException, InterruptedException {
+  private static void terminate(String bucketName) {
     managerStorageAdapter.deleteBucket(bucketName);
     responseQueue.deleteQueue();
   }
@@ -142,7 +141,17 @@ public class Local {
           throw new IllegalArgumentException("you need to pass number of files per worker");
         }
         inputFile = args[0];
+        if (!new File(inputFile).isFile()) {
+          System.err.println(
+                  "Input file provided could not be found in directory.\n");
+          return false;
+        }
         outputFile = args[1];
+        if(!outputFile.endsWith(".html")) {
+          System.err.println(
+                  "Output file must be and HTML file (with the '.html' suffix).\n");
+          return false;
+        }
         terminateManager = args[args.length - 1].equals("terminate");
         return true;
       default:

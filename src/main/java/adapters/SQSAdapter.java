@@ -44,7 +44,7 @@ public class SQSAdapter {
             .queueUrl(queueURL)
             .maxNumberOfMessages(1)
             .waitTimeSeconds(20)
-            .visibilityTimeout(45)
+            .visibilityTimeout(60 * 2)
             .build();
     ReceiveMessageResponse response = sqs.receiveMessage(messageRequest);
     if (response.hasMessages()) {

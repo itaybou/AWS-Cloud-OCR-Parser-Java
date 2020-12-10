@@ -12,6 +12,7 @@
 * [Instructions](#Instructions)
 * [Mandatory Requirements](#Mandatory-Requirements)
 
+
 ## General info
 
 Project GitHub repository link:
@@ -20,9 +21,10 @@ https://github.com/itaybou/AWS-Cloud-OCR-Parser-Java
 EC2 instances used:
 Manager & Workers - 
  * Used AMI - 
- 	- Manager - ami-0f3c7ed2b8b4ca277
-	- Worker - ami-04438a9e1605bea8d
+ 	- Manager - ami-031460345a19f545b
+	- Worker - ami-0d6c1006bc5c1bac7
  * Machine types - (64-bit x86) type: T2_MICRO
+
 
 ## Statistics:
 Running results time in *seconds*:
@@ -162,14 +164,14 @@ while <inputFileName> is the name of the input file, <outputFileName> is the nam
  - As mentioned in the Setup instructions, in order to use the application you must have a valid AWS account and it must contain the IAM role with the policy as mentioned above.
  - A text file named "iam_arn.txt" must be provided outside of the location the local-app jar file will be executed from containing both your AWS account Id and the Instance Profile ARN of the newly created role.
  
- ### Scalability
+### Scalability
  - The application does not save any output nor message in memory or on disk therefore, alothough the manager instance uses only T2_MICRO instance, it is able to perform on a large amount of local applications concurrently.
  - The application stores only the IDs of the local applications with their corresponding response queue URL and remaining image URL count that are needed in order to return an answer to the application. To prevent memory issues, the application holds new tasks while the memory consumption is more than 80% present on the EC2 instance.
  - The application starts workers by need in order to operate on more demanding local application tasks.
  - The application terminates worker instances if no current tasks are present and no new tasks recieved in a 5 minutes range in order to not waste resources.
  - The application uses streams in order to parse messages and send responses and therfore does not store entire input/output in memory, disk is not used, instead all sotrage is done in the S3 cloud.
  
-  ### Persistence
+ ### Persistence
   - The application uses AWS CloudWatch alarms and alarm actions in order to persist the application in case of faliures.
   - When CloudWatch alarm detect multiple error or unexpected behaviour(Termination, Stopping) of worker instances, it will restart the worker instance.
   - Alarm will trigger recovery/reboot the following issues occur more than 5 times in a timespan of 10 minutes:
@@ -178,11 +180,11 @@ while <inputFileName> is the name of the input file, <outputFileName> is the nam
 	- Software issues on the physical host
 	- Hardware issues on the physical host that impact network reachability
  
-  ### Concurrency
+ ### Concurrency
  - The manager node operates concurrently on both receiveing local tasks application and recieving worker node task responses (app listener thread, worker listener thread pool and worker task senders thread pool).
  - The manager nodes sends task messages to the workers SQS queue concurrently so that will start operate on those message before the manager finished sending all the requests (biggest impact on input files with more than 100 image URLS)
  
-  ### Multiple Local App clients
+ ### Multiple Local App clients
  - The application is able to handle multiple local application in the same time without failing due to the utilization of the AWS cloud resources.
  - Termination messages from an application will not prevent already recieved requests from other local apps to recieve output summary response.
  
@@ -199,7 +201,7 @@ while <inputFileName> is the name of the input file, <outputFileName> is the nam
 1. Manager stops all working threads and deletes worker tasks and responses queues and the local app tasks queue.
 1. Manager self terminates the machine which stops the AWS EC2 instance as a result.
  
-  ### Instances Tasks
+ ### Instances Tasks
 - Local App 
 	- Starts the manager node if not yet active.
 	- Sends a task to the manager node task queue containing the location of the input file in S3

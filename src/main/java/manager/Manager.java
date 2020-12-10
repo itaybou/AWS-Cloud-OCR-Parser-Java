@@ -128,13 +128,13 @@ public class Manager {
   private static void parseApplicationMessage(Message message) {
     try {
       if (isOverMemoryThreshold()) return;
-      appTasksQueue.deleteMessage(message);
       String[] messageSplits = MessageProtocol.split(message.body());
       UUID appId = UUID.fromString(messageSplits[1]);
       String inputFileBucketKey = messageSplits[2];
       int URLPerWorker = Integer.parseInt(messageSplits[3]);
       handleApplicationTask(appId, inputFileBucketKey, URLPerWorker);
       terminated.compareAndSet(false, Boolean.parseBoolean(messageSplits[4]));
+      appTasksQueue.deleteMessage(message);
     } catch (InterruptedException | ExecutionException | IOException e) {
       e.printStackTrace();
     }
@@ -142,10 +142,10 @@ public class Manager {
 
   private static void notifyTermination(Message message) {
     try {
-      appTasksQueue.deleteMessage(message);
       String[] messageSplits = MessageProtocol.split(message.body());
       UUID appId = UUID.fromString(messageSplits[1]);
       new SQSAdapter(sqs, appId.toString(), false).sendMessage(MessageProtocol.createManagerTerminationMessage());
+      appTasksQueue.deleteMessage(message);
     } catch (InterruptedException | ExecutionException e) {
       e.printStackTrace();
     }
@@ -153,10 +153,10 @@ public class Manager {
 
   private static void parseWorkerMessage(Message message) {
     try {
-      workerResponseQueue.deleteMessage(message);
       String[] messageSplits = MessageProtocol.split(message.body());
       String messageType = messageSplits[0];
       handleWorkerResponse(messageType, messageSplits);
+      workerResponseQueue.deleteMessage(message);
     } catch (ExecutionException | InterruptedException e) {
       e.printStackTrace();
     }
@@ -194,7 +194,7 @@ public class Manager {
   private static void isAppTaskFinished(UUID appId)
       throws ExecutionException, InterruptedException, IOException {
     LongAdder remainingLines = applicationLines.getOrDefault(appId, null).getValue1();
-    if (remainingLines != null && remainingLines.longValue() == 0) {
+    if (remainingLines != null && remainingLines.longValue() <= 0) {
       String queueURL = applicationLines.get(appId).getValue0();
       applicationLines.remove(appId);
       new SQSAdapter(sqs, queueURL).sendMessage(MessageProtocol.createManagerResponseMessage());
