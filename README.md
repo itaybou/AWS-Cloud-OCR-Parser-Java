@@ -75,7 +75,7 @@ parameter recieved from the local application
 1. Local Application downloads summary file from S3
 1. Local Application creates html output files
 
-- NOTES:
+- *NOTES:*
 	1. If manager recieves a termination message, the rest of the requests from other apps will be rejected and they will get a termination notification.
 	1. Upon termination message, manager will finish processing current accepted pending requests before terminating.
 
@@ -216,4 +216,5 @@ while <inputFileName> is the name of the input file, <outputFileName> is the nam
 - Worker
 	- Applies OCR by using the Tesseract Tess4j java library on the URLs recived from the messages in the worker task queue
 	- Sends the output or exception messages if occured while trying to download the image as a stream or to apply the OCR on the image.
+	- *NOTE:* workers work is not evenly distributed since they all read from the same worker tasks queue, therefore, one or more workers working harder then the other ones is a possible scenario. Since we send multiple messages to the queue upon receiving a new manager task and since OCR tasks usually take some time, most of the time workers will eventually balance the load. Generally, the workload distirbution is not controlled and the task distirbution among workers depends on the input image, on the pace the manager is able to send worker tasks into the worker task queue and on the individual pace the workers are able to recieve and process input images that depends on the EC2 instance load (network mainly) they are running on.
 
