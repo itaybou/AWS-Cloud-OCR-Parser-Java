@@ -20,8 +20,8 @@ https://github.com/itaybou/AWS-Cloud-OCR-Parser-Java
 EC2 instances used:
 Manager & Workers - 
  * Used AMI - 
- 	- Manager - ami-0885b1f6bd170450c
-	- Worker - ami-0885b1f6bd170450c
+ 	- Manager - ami-0f3c7ed2b8b4ca277
+	- Worker - ami-04438a9e1605bea8d
  * Machine types - (64-bit x86) type: T2_MICRO
 
 ## Statistics:
